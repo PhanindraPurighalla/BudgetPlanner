@@ -8,7 +8,7 @@ class UsersController extends AppController {
     public $components = array('Paginator', 'Search.Prg', 'RequestHandler');
     var $name = 'Users';
     public $paginate = array(
-        'limit' => 5,
+        'limit' => 50,
         'order' => array(
             'User.username' => 'asc'
         )

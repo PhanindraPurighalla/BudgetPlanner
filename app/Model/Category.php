@@ -4,7 +4,7 @@ class Category extends AppModel {
 	
 	public $actsAs = array('Search.Searchable', 'Containable');
 	
-	var $hasMany = 'Transaction';	
+	var $hasMany = array('Transaction', 'Expense');	
 	
 	public $filterArgs = array(
         'transaction_category' => array(

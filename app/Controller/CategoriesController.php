@@ -1,12 +1,12 @@
 <?php 
 class CategoriesController extends AppController {
 	public $helpers = array('Html', 'Form');
-	public $components = array('Paginator', 'Search.Prg');
+	public $components = array('Paginator', 'Search.Prg', 'RequestHandler');
 	
 	var $name='Categories';
 	
 	public $paginate = array(
-        'limit' => 5,
+        'limit' => 50,
         'order' => array(
             'Category.category_code' => 'asc'
         )
@@ -19,6 +19,8 @@ class CategoriesController extends AppController {
 			$this->Paginator->settings['conditions'] = $this->Category->parseCriteria($this->Prg->parsedParams());
 			$this->Category->recursive = 1;
 			$this->set('categories', $this->Paginator->paginate());
+                        $this->set('_serialize', array('categories'));
+                        $this->response->disableCache();
 		} catch (NotFoundException $e) {
         //Do something here like redirecting to first or last page.
 			debug($this->request->params['paging']);
@@ -27,48 +29,72 @@ class CategoriesController extends AppController {
 	
 	public function view($id = null) {
 		if (!$id) {
-			throw new NotFoundException(__('Invalid category'));
+			throw new NotFoundException(__('Invalid Category code'));
 		}
 		$category = $this->Category->findById($id);
 		
 		if (!$category) {
-			throw new NotFoundException(__('Invalid category'));
+                    $message = "Unable to locate category with id: $id";
 		}
+                else {
+                    $message = "Located category: " . $category['Category']['category_code'] . "";
+                }
 		$this->set('category', $category);
+                $this->set(compact('message', 'category'));
+                $this->set('_serialize', ['message', 'category']);
+                $this->response->disableCache();
 	}
 	
 	public function add() {
-		if ($this->request->is('post')) {
-			$this->Category->create();
-			if ($this->Category->save($this->request->data)) {
-				$this->Session->setFlash(__('New category has been saved.'));
-				return $this->redirect(array('action' => 'index'));
-			}
-			$this->Session->setFlash(__('Unable to configure new category.'));
-		}
-	}
-	
-	public function edit($id = null) {
+        if ($this->request->is('post')) {
+            $this->Category->create();
+            if ($this->Category->save($this->request->data)) {
+                $insertedCategory = $this->Category->findByCategoryCode($this->request->data['Category']['category_code']);
+
+                if (!$insertedCategory) {
+                    $message = "Could not insert category: " . $insertedCategory['Category']['category_code'] . "";
+                } else {
+                    $message = "Inserted category: " . $insertedCategory['Category']['category_code'] . "";
+                }                
+            }
+            else {
+                $message = "Could not insert category: " . $this->request->data['Category']['category_code'] . "";
+            }
+            $this->set(compact('message', 'insertedCategory'));
+            $this->set('_serialize', ['message', 'insertedCategory']);
+        }
+    }
+
+    public function edit($id = null) {
 		if (!$id) {
 			throw new NotFoundException(__('Invalid category'));
 		}
 		$category = $this->Category->findById($id);
 		if (!$category) {
-			throw new NotFoundException(__('Invalid category'));
+                    $message = "Unable to locate category with id: $id";
 		}
+		$this->set('category',$category);
 		
-		$this->Category->id = $id;
-		$this->set('category', $this->Category->read(null, $id));
-		
-		if ($this->request->is(array('post', 'put'))) {
+		if ($this->request->is(array('put'))) {
 			$this->Category->id = $id;
 			if ($this->Category->save($this->request->data)) {
-				$this->Session->setFlash(__('Category has been updated.'));
-				return $this->redirect(array('action' => 'index'));
+                                $updatedCategory = $this->Category->findById($id);
+                                
+                                if (!$updatedCategory) {
+                                    $message = "Could not update category: " . $category['Category']['category_code'] . "";
+                                }
+                                else {                                
+                                    $message = "Updated category: " . $category['Category']['category_code'] . "";
+                                }                                
 			}
-			$this->Session->setFlash(__('Unable to update category.'));
+                        else {
+                            $message = "Could not update category: " . $this->request->data['Category']['category_code'] . "";
+                        }
+                        $this->set(compact('message', 'updatedCategory'));
+                        $this->set('_serialize', ['message', 'updatedCategory']);
 		}
-		if (!$this->request->data) {
+              
+                if (!$this->request->data) {
 			$this->request->data = $category;
 		}
 	}
@@ -78,10 +104,12 @@ class CategoriesController extends AppController {
 			throw new MethodNotAllowedException();
 		}
 		if ($this->Category->delete($id)) {
-			$this->Session->setFlash(__('The category with id: %s has been deleted.', h($id)));
-			return $this->redirect(array('action' => 'index'));
+                    $message = 'The category with id: $id has been deleted.';
 		}
+                else {
+                    $message = "Unable to delete the Transaction type with id: $id ";
+                }
+                
+                $this->set(array('message' => $message,'_serialize' => array('message')));
 	}
-	
 }
-?>
