@@ -33,7 +33,7 @@ class ExpensesController extends AppController {
         if (!$id) {
 			throw new NotFoundException(__('Invalid expense description'));
 		}
-		$expense = $this->User->findByExpenseDesc($id);
+		$expense = $this->Expense->findByExpenseDesc($id);
 		
 		if (!$expense) {
                     $response = array([
