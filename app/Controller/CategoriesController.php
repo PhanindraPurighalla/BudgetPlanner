@@ -31,10 +31,10 @@ class CategoriesController extends AppController {
 		if (!$id) {
 			throw new NotFoundException(__('Invalid Category code'));
 		}
-		$category = $this->Category->findById($id);
+		$category = $this->Category->findByCategoryCode($id);
 		
 		if (!$category) {
-                    $message = "Unable to locate category with id: $id";
+                    $message = "Unable to locate category with code: $id";
 		}
                 else {
                     $message = "Located category: " . $category['Category']['category_code'] . "";
