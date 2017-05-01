@@ -20,10 +20,10 @@ class Category extends AppModel {
 	
 	public $validate = array(
 		'category_code' => array(
-		'rule' => 'notEmpty'
+		'rule' => 'notBlank'
 		),
 		'category_desc' => array(
-		'rule' => 'notEmpty'
+		'rule' => 'notBlank'
 		),
 		'category_code' => array(
 					'required' => array(
