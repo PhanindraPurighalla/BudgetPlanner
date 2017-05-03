@@ -25,6 +25,11 @@ class User extends AppModel {
             'className' => 'Transaction',
 			'foreignKey' => 'user_id',
 			'dependent' => true
+        ),
+        'Expense' => array(
+            'className' => 'Expense',
+			'foreignKey' => 'user_id',
+			'dependent' => true
         )
     );
 	

@@ -28,6 +28,35 @@ class ExpensesController extends AppController {
             debug($this->request->params['paging']);
         }
     }
+    
+    public function get_user_expenses($id = null) {
+        if (!$id) {
+			throw new NotFoundException(__('Invalid username'));
+		}
+                
+                //$user = $this->User->findByUsername($id);
+                
+		$expense = $this->Expense->User->findByUsername($id);
+		
+		if (!$expense) {
+                    $response = array([
+                            'result' => false,
+                            'code' => 'expense_not_found',
+                            'message' => "Unable to locate expenses by: $id" 
+                    ]);                    
+		}
+                else {
+                    $response = array([
+                            'result' => true,
+                            'code' => 'located_expense',
+                            'message' => "Located expenses for email: " . $expense['User']['email_id'] . "" 
+                    ]);
+                }
+		$this->set('expense', $expense);
+                $this->set(compact('response', 'expense'));
+                $this->set('_serialize', ['response', 'expense']);
+                $this->response->disableCache();        
+    }
 
     public function view($id = null) {
         if (!$id) {
