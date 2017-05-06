@@ -34,9 +34,10 @@ class ExpensesController extends AppController {
 			throw new NotFoundException(__('Invalid username'));
 		}
                 
-                //$user = $this->User->findByUsername($id);
+                $this->loadModel('User');
+                $user = $this->User->findByUsername($id);
                 
-		$expense = $this->Expense->User->findByUsername($id);
+		$expense = $this->Expense->find('all', array('recursive' => 2, 'conditions' => array('Expense.user_id' => $user['User']['id'])));
 		
 		if (!$expense) {
                     $response = array([
@@ -49,7 +50,7 @@ class ExpensesController extends AppController {
                     $response = array([
                             'result' => true,
                             'code' => 'located_expense',
-                            'message' => "Located expenses for email: " . $expense['User']['email_id'] . "" 
+                            'message' => "Located expenses for email: " . $user['User']['email_id'] . "" 
                     ]);
                 }
 		$this->set('expense', $expense);
